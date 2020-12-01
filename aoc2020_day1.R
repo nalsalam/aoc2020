@@ -6,7 +6,7 @@ v <- scan("input1a.txt")
 # outer sum
 x <- outer(v, t(v), FUN = "+")
 
-# Are there elements equal to 2020.  Yes two.
+# Are there elements equal to 2020.  Yes two symmetric sets.
 x[x == 2020] 
 # What are the row, column indices of those?
 r <- which(x == 2020, arr.ind = TRUE)
