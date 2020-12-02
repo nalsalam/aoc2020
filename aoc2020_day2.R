@@ -36,9 +36,17 @@ passwds <-
          
 # How many passwords are valid according to their policies?
 
+x <-
+passwds %>%
+  mutate(
+    count = str_count(passwd, pattern = char), 
+    valid = count >= rep_min & count <= rep_max
+  )
+View(x)
+  
 passwds %>%
   mutate(
     count = str_count(passwd, pattern = char), 
     valid = count >= rep_min & count <= rep_max
     ) %>%
-count(valid)
+count(valid)  # This answer of 401 is too low 
