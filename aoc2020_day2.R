@@ -35,10 +35,12 @@ map_dfr(1:nrow(passwds),
       passwd, 
       # building the regular expression pattern from rep_min, rep_max, and char
       # using multiple "." to anchor the position to look for the character
-      paste0("^", paste0(rep(".", rep_min - 1), collapse = ""), char, collapse = "")),
+      # paste0("^", paste0(rep(".", rep_min - 1), collapse = ""), char, collapse = "")),
+      paste0("^.{", rep_min - 1, "}", char, collapse = "")),
     str_detect(
       passwd, 
-      paste0("^", paste0(rep(".", rep_max - 1), collapse = ""), char, collapse = ""))
+      # paste0("^", paste0(rep(".", rep_max - 1), collapse = ""), char, collapse = ""))
+      paste0("^.{", rep_max - 1, "}", char, collapse = ""))
     )
   )
 ) %>%
