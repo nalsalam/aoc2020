@@ -11,17 +11,14 @@ library(tidyverse)
 # key:values pairs can be in any order of key
 # some keys will not exist, implicit missing
 
+# I think we should
+# 1. organize long with two colums key and value  
+# 2. add an id column that changes when a blank key value field is found
+# 3. use the id to pivot_wider() which will make implicit missings explicit
+
 dat <- read_lines(file = "data-naa/input4_test.txt")
 
-# Maybe add an id at each blank line, e.g.
-
-dat2 <- if_else(dat == "", "id:x", dat)
-
-# but need x to increment or at least be unique
-
-rec_num <- 1: (sum(dat2 == "id:x") + 1) # add 1 because EOF terminates a record also
-
-dat3 <- if_else(dat2 == "id:x", paste("id", rec_num, sep = ":"), dat2) # doesn't work
-
-
-  
+tibble(keyvalue =
+  # organize vector long
+  str_split(dat, pattern = " ") %>% flatten_chr()
+)
