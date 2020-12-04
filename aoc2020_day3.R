@@ -110,7 +110,7 @@ gen_pos_matrix <- function(traj_down, traj_right,
                        start_row = 1, start_col = 1) {
   cbind(
     (0:(n_iter-1) * traj_down) + start_row, # row positions
-    (0:(n_iter-1) * traj_right) %% wrap_width + start_col  # col positions
+    (0:(n_iter-1) * traj_right) %% wrap_width + start_col  # col positions using modulo arithmetic
   )
 }
 
