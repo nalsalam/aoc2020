@@ -16,6 +16,11 @@ library(tidyverse)
 # 2. add an id column that changes when a blank key value field is found
 # 3. use the id to pivot_wider() which will make implicit missings explicit
 
+
+
+
+####### 
+
 expected_fields <- tribble(
   ~field_code, ~field_desc,
   "byr", "Birth Year",
@@ -28,11 +33,18 @@ expected_fields <- tribble(
   "cid", "Country ID"
 )
 
-raw_input <- read_file(file = "data-jra/input4.txt")
+# 1 long string
+  raw_input <- read_file(file = "data-jra/input4.txt")
+  # copied and pasted this which resulted in \r\n\r\n for blank lines
+  raw_input <- read_file(file = "data-naa/input4_test.txt")
+  # save directly which results in \n\n for blank lines
+  raw_input <- read_file(file = "data-naa/input4.txt")
 
+# string split on blank lines
 sep_by_passport <- str_split(raw_input, pattern = "[\\n\\r]\\s*[\\n\\r]")[[1]]
 # a blank line separating two passports is identified by the presence of a newline codepoint, optional whitespace, and then another newline. I am unsure if \n is the only relevant newline, or additional newlines are possible
 
+# df organized lonig with id for passport
 sep_by_keyvalue <- str_split(sep_by_passport, pattern = "[\\n\\r\\s]") %>%
   tibble(
     id = 1:length(.),
@@ -42,11 +54,14 @@ sep_by_keyvalue <- str_split(sep_by_passport, pattern = "[\\n\\r\\s]") %>%
   filter(!is.na(keyvalue_text) & keyvalue_text != "") %>% # better way to trim last newline?
   separate(col = c(keyvalue_text), sep = ":", into = c("key", "value"))
 
+# pivot wide
 passports <- pivot_wider(sep_by_keyvalue,
                          names_from = "key", values_from = "value")
 
+# required fields do not include "cid"
 required_fields <- setdiff(expected_fields$field_code, "cid")
 
+# function to determine if passport is valid
 valid_passport <- function(data, required_fields) {
   data %>%
     mutate(across(all_of(required_fields), ~!is.na(.x))) %>%
@@ -55,9 +70,11 @@ valid_passport <- function(data, required_fields) {
     pull(valid)
 }
 
+# determine if each is valid
 validated_passports <- passports %>%
   mutate(., valid = valid_passport(., required_fields))
 
+# add them the number of valid
 sum(validated_passports$valid)
 
 # part 2:
