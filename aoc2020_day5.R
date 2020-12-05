@@ -38,6 +38,7 @@ max(bps_ids)
 # Part 2
 
 # Jam, what is another way of generating all seat ids?
+# crossing(row = 0:127, seat = 0:7) %>% transmute(seat_id = row * 8 + seat)
 
 all_seat_ids <- outer(c(0:7), c(0:127) * 8, FUN = "+") %>% as.vector()
 front_row_seat_ids <- outer(c(0:7), c(0) * 8, FUN = "+") %>% as.vector()
@@ -57,8 +58,8 @@ empty_seats[(empty_seats %in% (bps_ids + 1)) &
 seat_id_vectorized <- function(bp) {
 
   bp_txt_binary <- bp %>%
-    str_replace_all("B|R", "1") %>%
-    str_replace_all("F|L", "0")
+    str_replace_all("[BR]", "1") %>%
+    str_replace_all("[FL]", "0")
 
   digits <- str_length(bp[[1]])
 
@@ -92,7 +93,7 @@ candidate_seats_left <- function(all_ids, filled_ids) {
 }
 
 candidate_seats_left(
-  all_ids = 0:seat_id_vectorized("BBBBBBBRRR"),
+  all_ids = 0:seat_id_vectorized("BBBBBBBRRR"), # consecutively 0 to last row, far right
   filled_ids = bps_ids_jra
 )
 
