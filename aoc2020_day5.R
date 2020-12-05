@@ -96,3 +96,11 @@ candidate_seats_left(
   filled_ids = bps_ids_jra
 )
 
+bench::mark(
+  max(map_dbl(bps_jra, seat_id)),
+  max(seat_id_vectorized(bps_jra)),
+
+  min_iterations = 10
+)
+
+# vectorized version ~200X faster
