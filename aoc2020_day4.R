@@ -34,7 +34,7 @@ expected_fields <- tribble(
 )
 
 # 1 long string
-  raw_input <- read_file(file = "data-jra/input4.txt")
+  # raw_input <- read_file(file = "data-jra/input4.txt")
   # copied and pasted this which resulted in \r\n\r\n for blank lines
   raw_input <- read_file(file = "data-naa/input4_test.txt")
   # save directly which results in \n\n for blank lines
