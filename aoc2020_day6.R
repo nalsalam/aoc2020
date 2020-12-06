@@ -22,16 +22,34 @@ sum(yes_anyone(input))
 
 # Part 2
 
-#' Yes by everyone in a group
+#' Number of common yes's by everyone in a group
 #' 
-#' @param group, a character vector of answers for each person
+#' @param group, a list of list of vectors answers for each person
 #' @return a character vector of answer everyone said yes to
 #' 
 everyone <- function(group) {
-  group %>% str_split("") %>% reduce(group, intersect, .init = letters)
+  reduce(group, intersect, .init = letters) %>% length()
 }
 
-groups <- str_split(input,"\\n\\n")[[1]] %>% str_split("\\n") 
-intersect(groups[[3]][[1]] %>% str_split("") %>% unlist(), 
-          groups[[3]][[2]]  %>% str_split("") %>% unlist())  
+# list (groups) of lists (people) of character vector (yes answers)
+input <- read_file(file = "data-naa/input6_test.txt") %>%
+  str_replace_all("\\r\\n", "\n")
 
+groups <- str_split(input,"\\n\\n")[[1]] %>% 
+  str_split("\\n") %>% map(str_split, "")
+
+testthat::expect_equal(map_dbl(groups, everyone), c(3, 0, 1, 1, 1))
+testthat::expect_equal(sum(map_dbl(groups, everyone)), 6)
+
+input <- read_file(file = "data-naa/input6.txt") %>%
+  str_replace_all("\\r\\n", "\n") %>%
+  str_replace("\\n$", "") # stray \n at the end
+
+groups <- str_split(input,"\\n\\n")[[1]] %>% 
+  str_split("\\n") %>% map(str_split, "")
+
+sum(map_dbl(groups, everyone))
+
+
+
+input
