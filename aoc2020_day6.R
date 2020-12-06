@@ -31,13 +31,12 @@ everyone <- function(group) {
   reduce(group, intersect, .init = letters) %>% length()
 }
 
-# list (groups) of lists (people) of character vector (yes answers)
 input <- read_file(file = "data-naa/input6_test.txt") %>%
   str_replace_all("\\r\\n", "\n")
 
+# list (groups) of lists (people) of character vector (yes answers)
 groups <- str_split(input,"\\n\\n")[[1]] %>% 
   str_split("\\n") %>% map(str_split, "")
-
 testthat::expect_equal(map_dbl(groups, everyone), c(3, 0, 1, 1, 1))
 testthat::expect_equal(sum(map_dbl(groups, everyone)), 6)
 
@@ -49,7 +48,3 @@ groups <- str_split(input,"\\n\\n")[[1]] %>%
   str_split("\\n") %>% map(str_split, "")
 
 sum(map_dbl(groups, everyone))
-
-
-
-input
