@@ -2,16 +2,10 @@ library(tidyverse)
 
 # Day 7 -- baggage rules
 
-# rules for colors containing colors and numbers there of
-# treat color as an element name
-# use recursion to test
-
 # A data structure to represent the rules:
 # The rules are a named list of outside colors
 # Each list element is a named integer vector
 # Why?  names can be used to subset
-
-input <- read_lines("data-naa/input7_test.txt")
 
 create_rules <- function(input) {
   outside_colors <-
@@ -36,5 +30,25 @@ create_rules <- function(input) {
   set_names(rules, outside_colors)
 }
 
+input <- read_lines("data-naa/input7_test.txt")
 rules <- create_rules(input)
+# NEED TO FIX: no other bags needs to be the empty vector
+
+# Count the ways 
+
+shiny_gold_inside <- function(outside_color) {
+  "shiny gold" %in% names(rules[[outside_color]])
+}
+map_lgl(outside_colors, shiny_gold_inside) %>% sum()  # directly
+
+# How about indirectly? Need to look for shiny gold one layer deeper
+# So need to go through inside colors of every rule also
+
+# This doesn't work.  Sorry.  Taking a break.
+shiny_gold_inside_2 <- function(outside_color, outside_colors = outside_colors) {
+  
+  if("shiny gold" %in% names(rules[[outside_color]])) TRUE
+  else map(outside_colors, shiny_gold_inside_2(.x))
+  else FALSE
+}
 
