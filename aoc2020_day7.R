@@ -118,3 +118,45 @@ rules_df <- create_rules(input) %>%
 all_colors <- union(rules_df$parent, rules_df$child)
 num_colors_contain_shiny_gold(all_colors, rules_df)
 
+nobag <- tibble(
+  parent = c("", NA_character_),
+  child = c("", NA_character_),
+  num = c(0, 0)
+)
+
+fullbag <- tibble(
+  parent = unique(c(rules_df$parent, rules_df$child, "fullbag")),
+  child = "fullbag",
+  num = 1
+)
+
+rules_df0 <- rules_df %>%
+  mutate(num = as.numeric(num)) %>%
+  mutate(child = if_else(child == "", NA_character_, child)) %>%
+  mutate(num = if_else(is.na(num), 0, num)) %>%
+  bind_rows(nobag) %>%
+  bind_rows(fullbag)
+
+subbags_of <- function(cat) {
+
+  next_cats <- cat
+  next_nums <- 1
+
+  while (!all(next_cats %in% c("fullbag", NA_character_))) {
+
+    df <- tibble(
+      catcol = next_cats,
+      numcol = next_nums
+    ) %>%
+      left_join(rules_df0, c("catcol" = "parent")) %>%
+      group_by(child) %>%
+      summarize(num = sum(num * numcol), .groups = "drop")
+
+    next_cats <- df$child
+    next_nums <- df$num
+    res <- sum(df$num)
+  }
+ res - length(cat) # originally submitted bag(s) not included
+}
+
+subbags_of("shiny gold")
