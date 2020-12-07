@@ -30,7 +30,6 @@ sum(yes_anyone(input))
 everyone <- function(group) {
   reduce(group, intersect, .init = letters) %>% length()
 }
-
 input <- read_file(file = "data-naa/input6_test.txt") %>%
   str_replace_all("\\r\\n", "\n")
 
@@ -48,3 +47,11 @@ groups <- str_split(input,"\\n\\n")[[1]] %>%
   str_split("\\n") %>% map(str_split, "")
 
 sum(map_dbl(groups, everyone))
+
+# Part 1 using Part 2 approach to input organization and processing
+
+anyone <- function(group) {
+  reduce(group, union) %>% length()
+}
+testthat::expect_equal(sum(yes_anyone(input)), sum(map_dbl(groups, anyone)))
+
