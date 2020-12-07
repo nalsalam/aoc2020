@@ -33,6 +33,8 @@ create_rules <- function(input) {
 
 
 input <- read_lines("data-naa/input7_test.txt")
+
+# named list of a named vector
 rules <- create_rules(input)
 
 make_rules_df <- function(rules) {
@@ -43,11 +45,13 @@ make_rules_df <- function(rules) {
     unnest(child_data)
 }
 
+# parent-child pairs
 rules_df <- make_rules_df(rules) %>%
   filter(!is.na(num))
 
 source("R/category-funs.R")
 
+# just in case there is a child color not in parent
 all_colors <- union(rules_df$parent, rules_df$child)
 
 num_colors_contain_shiny_gold <- function(all_colors, rules_df) {
@@ -63,7 +67,7 @@ num_colors_contain_shiny_gold <- function(all_colors, rules_df) {
 
 num_colors_contain_shiny_gold(all_colors, rules_df)
 
-# Count the ways
+# Pops' start that worked for example but not for the puzzle
 
 shiny_gold_direct <- function(outside_color) {
   "shiny gold" %in% names(rules[[outside_color]])
@@ -98,6 +102,8 @@ map_lgl(outside_colors, shiny_gold_eventually) %>% sum()
 
 # Part 1
 
+## Pops' start that went nowhere
+
 input <- read_lines("data-jra/input7.txt")
 
 outside_colors <-
@@ -108,9 +114,8 @@ rules <- create_rules(input)
 
 map_lgl(outside_colors, shiny_gold_eventually) %>% sum()
 
-# Not the right answer -- probably need to go deep
-
 # Jams:
+# Part 1
 
 input <- read_lines("data-jra/input7.txt")
 rules_df <- create_rules(input) %>%
@@ -118,6 +123,7 @@ rules_df <- create_rules(input) %>%
 all_colors <- union(rules_df$parent, rules_df$child)
 num_colors_contain_shiny_gold(all_colors, rules_df)
 
+# Part 2
 nobag <- tibble(
   parent = c("", NA_character_),
   child = c("", NA_character_),
@@ -157,6 +163,59 @@ subbags_of <- function(cat) {
     res <- sum(df$num)
   }
  res - length(cat) # originally submitted bag(s) not included
+}
+
+subbags_of("shiny gold")
+
+# Pops' input with Jam's solution
+# Part 1
+
+input <- read_lines("data-naa/input7.txt")
+rules_df <- create_rules(input) %>%
+  make_rules_df()
+all_colors <- union(rules_df$parent, rules_df$child)
+num_colors_contain_shiny_gold(all_colors, rules_df)
+
+# Part 2
+nobag <- tibble(
+  parent = c("", NA_character_),
+  child = c("", NA_character_),
+  num = c(0, 0)
+)
+
+fullbag <- tibble(
+  parent = unique(c(rules_df$parent, rules_df$child, "fullbag")),
+  child = "fullbag",
+  num = 1
+)
+
+rules_df0 <- rules_df %>%
+  mutate(num = as.numeric(num)) %>%
+  mutate(child = if_else(child == "", NA_character_, child)) %>%
+  mutate(num = if_else(is.na(num), 0, num)) %>%
+  bind_rows(nobag) %>%
+  bind_rows(fullbag)
+
+subbags_of <- function(cat) {
+  
+  next_cats <- cat
+  next_nums <- 1
+  
+  while (!all(next_cats %in% c("fullbag", NA_character_))) {
+    
+    df <- tibble(
+      catcol = next_cats,
+      numcol = next_nums
+    ) %>%
+      left_join(rules_df0, c("catcol" = "parent")) %>%
+      group_by(child) %>%
+      summarize(num = sum(num * numcol), .groups = "drop")
+    
+    next_cats <- df$child
+    next_nums <- df$num
+    res <- sum(df$num)
+  }
+  res - length(cat) # originally submitted bag(s) not included
 }
 
 subbags_of("shiny gold")
