@@ -5,7 +5,9 @@ library(tidyverse)
 # A data structure to represent the rules:
 # The rules are a named list of outside colors
 # Each list element is a named integer vector
-# Why?  names can be used to subset
+# Why? names can be used to subset
+# Jam prefers a data from of parent-child links
+# Why? join, unique can be used
 
 create_rules <- function(input) {
   outside_colors <-
@@ -49,6 +51,7 @@ make_rules_df <- function(rules) {
 rules_df <- make_rules_df(rules) %>%
   filter(!is.na(num))
 
+# subcats_of()
 source("R/category-funs.R")
 
 # just in case there is a child color not in parent
@@ -57,9 +60,10 @@ all_colors <- union(rules_df$parent, rules_df$child)
 num_colors_contain_shiny_gold <- function(all_colors, rules_df) {
 
   color_options <- setdiff(all_colors, "shiny gold")
-
   map_lgl(
     color_options,
+    # subcats_of find colors reachable 
+    # starting with the color in the first argument
     ~"shiny gold" %in% subcats_of(.x, rules_df)
   ) %>%
     sum()
@@ -67,7 +71,8 @@ num_colors_contain_shiny_gold <- function(all_colors, rules_df) {
 
 num_colors_contain_shiny_gold(all_colors, rules_df)
 
-# Pops' start that worked for example but not for the puzzle
+# My start that worked for example but not the puzzle 
+# because for the former going in one level was enough
 
 shiny_gold_direct <- function(outside_color) {
   "shiny gold" %in% names(rules[[outside_color]])
@@ -87,8 +92,6 @@ shiny_gold_eventually <- function(outside_color) {
   )
 }
 
-shiny_gold_eventually("dark olive")
-
 # shiny_gold_eventually is not vectorized
 testthat::expect_equal(
   c(shiny_gold_eventually("bright white"),
@@ -100,22 +103,9 @@ testthat::expect_equal(
 )
 map_lgl(outside_colors, shiny_gold_eventually) %>% sum()
 
-# Part 1
-
-## Pops' start that went nowhere
-
-input <- read_lines("data-jra/input7.txt")
-
-outside_colors <-
-  str_extract(input, "^.+( bags contain)") %>%
-  str_replace(" bags contain", "")
-
-rules <- create_rules(input)
-
-map_lgl(outside_colors, shiny_gold_eventually) %>% sum()
-
 # Jams:
 # Part 1
+# number of bag colors than can contain a shiny gold bag
 
 input <- read_lines("data-jra/input7.txt")
 rules_df <- create_rules(input) %>%
@@ -124,6 +114,8 @@ all_colors <- union(rules_df$parent, rules_df$child)
 num_colors_contain_shiny_gold(all_colors, rules_df)
 
 # Part 2
+# how many bags are required in 1 shiny gold bag
+
 nobag <- tibble(
   parent = c("", NA_character_),
   child = c("", NA_character_),
@@ -140,8 +132,9 @@ rules_df0 <- rules_df %>%
   mutate(num = as.numeric(num)) %>%
   mutate(child = if_else(child == "", NA_character_, child)) %>%
   mutate(num = if_else(is.na(num), 0, num)) %>%
-  bind_rows(nobag) %>%
-  bind_rows(fullbag)
+  bind_rows(nobag) %>% # why?
+  bind_rows(fullbag) 
+rules_df0 %>% View()
 
 subbags_of <- function(cat) {
 
@@ -167,6 +160,7 @@ subbags_of <- function(cat) {
 
 subbags_of("shiny gold")
 
+
 # Pops' input with Jam's solution
 # Part 1
 
@@ -177,6 +171,8 @@ all_colors <- union(rules_df$parent, rules_df$child)
 num_colors_contain_shiny_gold(all_colors, rules_df)
 
 # Part 2
+
+
 nobag <- tibble(
   parent = c("", NA_character_),
   child = c("", NA_character_),
