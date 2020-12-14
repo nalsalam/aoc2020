@@ -140,3 +140,6 @@ anti_join(seat_state_100, seat_state_102)
 seat_state_100 %>% summarize(occupied_seats = sum(seat_state == "#"))
 seat_state_101 %>% summarize(occupied_seats = sum(seat_state == "#"))
 
+# Part 2 --
+# Only the seats along (unblocked) rays are seen 
+# 5+ occupied to go to empty
