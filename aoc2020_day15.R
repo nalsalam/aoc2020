@@ -1,5 +1,7 @@
 # --- Day 15: Rambunctious Recitation ---
 
+library(tidyverse)
+
 # memory game -- saying numbers
 
 # speak a number and update history
@@ -27,6 +29,7 @@ play_game2 <- function(input, stop) {
   history <- rep(0L, stop)
   history[1:s] <- input %>% as.integer()
   
+# guessing that %in% and which() slow this down  
   i <- s
   while(i < stop) {  
     if(!(history[i] %in% history[1: (i-1)])) {
@@ -41,37 +44,48 @@ play_game2 <- function(input, stop) {
 history[stop]  
 }
 
+# From
 # https://github.com/AdroMine/AdventOfCode2020/blob/main/Day15/solution.R
-find_n_num <- function(starting_nums, n){
-  starting_nums <- as.integer(starting_nums)
-  s <- length(starting_nums)
+
+play_game3 <- function(input, stop) {
+
+  # vector indexed by number from 0+ with value of the turn when last seen
+  # the number cannot be larger than the number of turns
   
-  last_seen <- rep(0L, n)
-  
-  # 0 saved at 1
-  last_seen[starting_nums[-s] + 1L] <- 1L:(s-1L)
-  
-  num <- starting_nums[s] 
-  for(turn in (s+1L):n){
+  # zero means never
+  turn_seen <- rep(0L, stop) # safely long
+  start <- length(input)
+
+  # last number spoken and turns previous ones were spoken
+  num <- input[start]
+  turn_seen[input[-start] + 1L] <- 1L:(start - 1L)
+
+  for(turn in (start + 1L):stop) {  
+    
+    # need at bottom for updating turn_seen
     tmp <- num
-    if(last_seen[num+1L]!=0L){ 
-      num <- turn - 1L - last_seen[num + 1L]
-    } else{                
+    
+    if(turn_seen[num + 1L] != 0L) {
+    # previous turn - turn spoken before then
+      num <- turn - 1L - turn_seen[num + 1L] 
+    }
+    else {
       num <- 0L
     }
-    last_seen[tmp + 1L] <- turn - 1L
+    turn_seen[tmp + 1L] <- turn - 1L
   }
+  # number spoken 
   num
 }
 
 # Part 1 examples
 
-play_game(c(0, 3, 6)) == 436
-play_game(c(1, 3, 2)) == 1
-play_game(c(1, 2, 3)) == 27
-play_game(c(2, 3, 1)) == 78
-play_game(c(3, 2, 1)) == 438
-play_game(c(3, 1, 2)) == 1836
+play_game3(c(0, 3, 6), 2020) == 436
+play_game3(c(1, 3, 2), 2020) == 1
+play_game3(c(1, 2, 3), 2020) == 27
+play_game3(c(2, 3, 1), 2020) == 78
+play_game3(c(3, 2, 1), 2020) == 438
+play_game3(c(3, 1, 2), 2020) == 1836
 
 # Part 1 puzzle
 
@@ -84,7 +98,7 @@ system.time(play_game(c(15,12,0,14,3,1))) # 249, .07
 bench::mark(
   play_game(c(15,12,0,14,3,1), 1000),  
   play_game2(c(15,12,0,14,3,1), 1000), # 1.05 times faster
-  find_n_num(c(15,12,0,14,3,1), 1000), # 100 times faster!!! Much less memory
+  play_game3(c(15,12,0,14,3,1), 1000), # 100 times faster!!! Much less memory
 iterations = 10
 )
 
@@ -99,7 +113,5 @@ play_game(c(2, 3, 1), 3e7) == 6895259
 play_game(c(3, 2, 1), 3e7) == 18
 play_game(c(3, 1, 2), 3e7) == 362
 
-system.time(play_game(c(15,12,0,14,3,1), 1e6) %>% print(digits = 22))
-
-system.time(find_n_num(c(15,12,0,14,3,1), 3e7) %>% print(digits = 22)) 
+system.time(play_game3(c(15,12,0,14,3,1), 3e7) %>% print(digits = 22)) 
 # 41687 in 8.03 seconds
